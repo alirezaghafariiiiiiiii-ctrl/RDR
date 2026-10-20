@@ -1,0 +1,9 @@
+/* audio.js - procedural music, ambient wind/rain, helpers (Web Audio, no asset files) */
+function note(f,d,t='triangle',v=.03){try{ac=ac||new AudioContext();const o=ac.createOscillator(),n=ac.createGain(),a=ac.currentTime;o.type=t;o.frequency.value=f;n.gain.setValueAtTime(v,a);n.gain.exponentialRampToValueAtTime(.001,a+d);o.connect(n);n.connect(ac.destination);o.start();o.stop(a+d)}catch(e){}}
+function hat(v){try{if(!NBUF)return;const s=ac.createBufferSource(),f=ac.createBiquadFilter(),n=ac.createGain(),a=ac.currentTime;s.buffer=NBUF;f.type='highpass';f.frequency.value=6000;n.gain.setValueAtTime(v,a);n.gain.exponentialRampToValueAtTime(.001,a+.05);s.connect(f);f.connect(n);n.connect(ac.destination);s.start();s.stop(a+.06)}catch(e){}}
+function audioInit(){try{ac=ac||new AudioContext();if(AMB)return;const n=ac.sampleRate*2,b=ac.createBuffer(1,n,ac.sampleRate),d=b.getChannelData(0);for(let i=0;i<n;i++)d[i]=Math.random()*2-1;NBUF=b;
+const mkn=(type,fr)=>{const s=ac.createBufferSource();s.buffer=b;s.loop=true;const f=ac.createBiquadFilter();f.type=type;f.frequency.value=fr;const gn=ac.createGain();gn.gain.value=0;s.connect(f);f.connect(gn);gn.connect(ac.destination);s.start();return gn};AMB={wind:mkn('lowpass',420),rain:mkn('highpass',3500)}}catch(e){}}
+function musicToggle(){MU=!MU;try{localStorage.setItem('dl_mu',MU?'1':'0')}catch(e){}if(S=='p')TX.push({x:P.x,y:P.y-30,s:MU?'MUSIC ON':'MUSIC OFF',l:50,c:C.cr})}
+function musTick(){if(!ac||!AMB)return;if(tick%20==0){AMB.wind.gain.value=MU?.012+.05*(wx==1?wf:0)+.008*NI:0;AMB.rain.gain.value=MU&&wx==2?.05*wf:0}
+if(!MU||S!='p')return;const cb=E.some(e=>e.ag),st=cb?9:19;if(tick%st)return;mnt++;const bs=[110,110,98,82.4,110,110,123.5,82.4],ml=[0,0,330,0,392,0,330,294,0,0,261.6,0,294,0,220,0];
+note(bs[mnt%8],cb?.18:.4,'triangle',.05);if(cb){if(mnt%2==0)note(55,.12,'sine',.07);hat(.04);if(mnt%4==3)note(bs[mnt%8]*2,.1,'square',.015)}else{const m=ml[mnt%16];if(m)note(m,.8,'sine',.03)}}
